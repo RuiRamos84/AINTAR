@@ -1,0 +1,43 @@
+.dashboard {
+    display: flex;
+    width: 100%;
+}
+
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 5px;
+    background-color: #ddd;
+    transition: width 0.3s;
+}
+
+.sidebar.open {
+    width: 200px;
+}
+
+.toggle-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}
+
+.menu {
+    opacity: 0;
+    transition: opacity 0.3s;
+    margin-top: 50px;
+}
+
+.sidebar.open .menu {
+    opacity: 1;
+}
+
+.content {
+    flex-grow: 1;
+    margin-left: 5px;
+}
+

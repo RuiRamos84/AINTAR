@@ -1,0 +1,157 @@
+.app {
+    display: flex;
+    flex-direction: column;
+    min-height: 998vh;
+}
+
+.navbar {
+    top: 0;
+    width: 100%;
+    z-index: 100;
+}
+
+.content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 80px 0;
+    /* min-height: 100vh; */
+}
+
+.pr-container {
+    width: 90%;
+    flex-direction: column;
+    justify-content: center;
+    background-color: rgba(241, 241, 241, 0.75);
+    padding: 20px;
+    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.3);
+    border-radius: 10px;
+}
+
+.en-container {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    flex-direction: column;
+    justify-content: center;
+    background-color: rgba(241, 241, 241, 0.75);
+    padding: 20px;
+    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.3);
+    border-radius: 10px;
+}
+
+.dashboard-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    margin-left: 4%;
+    width: 92%;
+    max-width: 1200px;
+    height: auto;
+    background-color: rgba(241, 241, 241, 0.75);
+    padding: 10px;
+    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.3);
+    border-radius: 10px;
+}
+
+.dashboard-component {
+    min-width: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(241, 241, 241, 0.75);
+    padding: 10px;
+    margin: 10px 0;
+    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.3);
+    border-radius: 10px;
+    /* Aqui você pode adicionar mais estilos se desejar */
+}
+
+.dashboard-total-component {
+    height: 250px;
+    background-color: rgba(241, 241, 241, 0.75);
+    position: relative;
+    padding: 10px;  
+    margin-right: 10px;
+    margin-left: 10px;
+    flex-basis: calc(20% - 20px);
+    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.3);
+    border-radius: 10px;
+    /* Aqui você pode adicionar mais estilos se desejar */
+}
+
+.dashboard-to-component {
+    background-color: rgba(241, 241, 241, 0.75);
+    position: relative;
+    padding: 10px;
+    margin-right: 10px;
+    margin-left: 10px;
+    flex-basis: calc(20% - 20px);
+    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.3);
+    border-radius: 10px;
+    /* Aqui você pode adicionar mais estilos se desejar */
+}
+
+.dashboard-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    padding-left: 10px;
+    padding-right: 10px;
+    margin-bottom: 20px;
+}
+
+.dashboard-rows {
+    /* display: flex; */
+    flex-wrap: wrap;
+    justify-content: space-between;
+    padding-left: 10px;
+    padding-right: 10px;
+    margin-bottom: 20px;
+}
+
+.relative-container {
+    text-align:center;
+    position:relative;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(241, 241, 241, 0.75);
+    box-shadow: 0px 5px 15px rgba(0, 0.2, 0, 0.3);
+    border-radius: 10px;
+}
+
+.pagination-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+.shadow-btn {
+    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.5);
+    /* Ajuste conforme necessário */
+}
+
+.pr-container h1 {
+    font-size: 3em;
+    text-shadow: 0px 5px 10px rgba(0, 0, 0, 0.1);
+}
+
+.shadow-input{
+    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+
+
+
+.footer {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    z-index: 100;
+}
+
+.smallFont {
+    font-size: 0.8em;
+    /* 0.8em significa 80% do tamanho da fonte atual */
+}
+

@@ -1,0 +1,50 @@
+
+
+.eye-icon-container {
+    position: relative;
+}
+
+.eye-icon {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+    cursor: pointer;
+}
+
+
+
+
+
+.edit-button {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+}
+
+.perfil-container h1 {
+    font-size: 3em;
+    
+}
+
+
+
+
+
+.page-content {
+    padding-top: 70px;
+    /* ajuste esse valor de acordo com a altura da sua navbar */
+    padding-bottom: 70px;
+    /* ajuste esse valor de acordo com a altura do seu footer */
+}
+
+
+
+.edit-button-absolute {
+    position: absolute;
+    bottom: -12px;
+    /* Ajuste esse valor conforme necessário */
+    right: -10px;
+    /* Ajuste esse valor conforme necessário */
+}
+
