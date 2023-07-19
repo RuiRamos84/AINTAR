@@ -99,7 +99,7 @@ const AppNavbar = () => {
           >
             <Nav className="mr-auto">
               <Nav.Link href="/">Home</Nav.Link>
-              <Nav.Link href="/about">About</Nav.Link>
+              {/* <Nav.Link href="/about">About</Nav.Link> */}
               {user && user.profil === "1" && (
                 <Nav.Link href="/entity">Entidades</Nav.Link>
               )}
