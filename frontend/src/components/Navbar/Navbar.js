@@ -2,15 +2,14 @@ import React, { useContext, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../../context/AuthContext";
 import { AlertContext } from "../../context/AlertContext";
-import { Container, Badge } from "react-bootstrap";
+import { Container } from "react-bootstrap";
+import { Navbar, Nav, Image, Dropdown } from "react-bootstrap";
+import { NotificationContext } from "../../context/NotificationContext";
 import LoginModal from "../../pages/Auth/LoginPage";
 import UserModal from "../../pages/Auth/UserModal";
 import AddEditOrderModal from "../../pages/Orders/AddOrderModal";
-import Dashboard from "../../pages/Dashboard/Dashboard";
 import manAvatar from "../../assets/man.png";
 import logo from "../../assets/logo.png";
-import { Navbar, Nav, Image, Dropdown } from "react-bootstrap";
-import { NotificationContext } from "../../context/NotificationContext";
 
 
 
@@ -101,12 +100,21 @@ const AppNavbar = () => {
             <Nav className="mr-auto">
               <Nav.Link href="/">Home</Nav.Link>
               <Nav.Link href="/about">About</Nav.Link>
-              <Nav.Link href="/contact">Contact</Nav.Link>
               {user && user.profil === "1" && (
                 <Nav.Link href="/entity">Entidades</Nav.Link>
               )}
               {user && (user.profil === "1" || user.profil === "2") && (
-                <Nav.Link href="/dashboard">Dashboard</Nav.Link>
+                <>
+                  <Nav.Link href="/dashboard">Dashboard</Nav.Link>
+                  <Nav.Link href="/my_orders_tasks">
+                    Tarefas 
+                    {orderCount > 0 && (
+                      <span className="badge rounded-pill bg-danger ms-1">
+                        {orderCount < 100 ? orderCount : "99+"}
+                      </span>
+                    )}
+                  </Nav.Link>
+                </>
               )}
               {user &&
                 (user.profil === "1" ||
@@ -135,11 +143,6 @@ const AppNavbar = () => {
                             className="d-flex align-items-center justify-content-between"
                           >
                             <div>Meus Pedidos</div>
-                            {isDropdownOpen && orderCount > 0 && (
-                              <span className="badge rounded-pill bg-danger">
-                                {orderCount < 100 ? orderCount : "99+"}
-                              </span>
-                            )}
                           </Dropdown.Item>
                         )}
                         <Dropdown.Item as={Link} to="/orders">
@@ -147,11 +150,6 @@ const AppNavbar = () => {
                         </Dropdown.Item>
                       </Dropdown.Menu>
                     </Dropdown>
-                    {!isDropdownOpen && orderCount > 0 && (
-                      <span className="badge rounded-pill bg-danger ml-2">
-                        {orderCount < 100 ? orderCount : "99+"}
-                      </span>
-                    )}
                   </div>
                 )}
             </Nav>

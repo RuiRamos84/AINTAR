@@ -135,7 +135,7 @@ def send_courtesy_email(name, email):
         msg = Message(subject, recipients=[email])
         msg.body = body
         mail.send(msg)
-        print("E-mail enviado com sucesso")  # Adicione este print
+        print("E-mail enviado com sucesso") 
     except Exception as e:
         print(f"Erro ao enviar o e-mail: {e}")
         return False
@@ -221,7 +221,6 @@ def fs_setsession(session):
         db.session.commit()
         first_row = result.fetchone()
         if first_row:
-            # Acessa o valor da primeira coluna da linha
             message = first_row[0]
             parsed_message = format_message(message)
             if str(parsed_message) == str(session):
@@ -356,6 +355,7 @@ def handle_file_upload(files, pk_result, tb_document):
             print(extension)
             filename_result = db.session.execute(
                 filename_query, {'d': tb_document, 't': 3, 'm': description, 'e': extension}).scalar()
+
             db.session.commit()
 
             # Garantir que o nome do ficheiro é seguro para guardar no sistema de ficheiros
@@ -375,8 +375,9 @@ def handle_file_upload(files, pk_result, tb_document):
                 print(f"Erro ao salvar o ficheiro: {str(e)}")
         print(f"Foram adicionados {file_counter} ficheiros.")
     except Exception as e:
+        formatted_error = format_message(str(e))
         print(f"Erro ao processar o upload de ficheiros: {str(e)}")
-        return False
+        return formatted_error, 500
 
 
 

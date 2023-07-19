@@ -1,5 +1,18 @@
 import React, { useState, useEffect, useContext, useRef, memo } from "react";
-import { Modal, Button, FloatingLabel, Form } from "react-bootstrap";
+import {
+  InputGroup,
+  Modal,
+  Button,
+  Table,
+  Form,
+  Row,
+  Col,
+  FloatingLabel,
+  Overlay,
+  Tooltip,
+  FormControl,
+} from "react-bootstrap";
+import { BsTrash, BsFolderPlus } from "react-icons/bs";
 import OrdersService from "../../services/OrderService";
 import { AuthContext } from "../../context/AuthContext";
 import { fieldMappings, getMetaData } from "../../utils/Utils";
@@ -7,28 +20,21 @@ import { getUserInfo, incrementOrderCount } from "../../services/authService";
 import { AlertContext } from "../../context/AlertContext";
 import AddEditEntity from "../Entitys/EntityAddModal";
 
-const fieldNames = [
-  "nipc",
-  "tt_type",
-  "ts_associate",
-  "memo",
-];
+const fieldNames = ["nipc", "tt_type", "ts_associate", "memo"];
 const AddEditOrderModal = ({ document, show, handleClose }) => {
   const { user } = useContext(AuthContext);
   const { showAlert } = useContext(AlertContext);
   const [typeOptions, setTypeOptions] = useState([]);
   const [associateOptions, setAssociateOptions] = useState([]);
   const [editedDocument, setEditedDocument] = useState(document);
-  const [fileDescriptions, setFileDescriptions] = useState([]);
-  const [files, setFiles] = useState([]);
   const authContext = useContext(AuthContext);
-  const fileInput = useRef(null);
+  const [fileInputs, setFileInputs] = useState([
+    { file: null, description: "" },
+  ]);
   const [errorMessage, setErrorMessage] = useState("");
   const [fileObjects, setFileObjects] = useState([
     { file: null, description: "" },
   ]);
-
-
 
   const handleFieldChange = (fieldName, newValue) => {
     setEditedDocument({ ...editedDocument, [fieldName]: newValue });
@@ -45,23 +51,55 @@ const AddEditOrderModal = ({ document, show, handleClose }) => {
     fieldNames.includes(field.name)
   );
 
-  const handleFileChange = (index, file) => {
+  const handleFileChange = (e, index) => {
+    const file = e.target.files[0];
     const newFileObjects = [...fileObjects];
     newFileObjects[index].file = file;
+
+    const newFileInputs = [...fileInputs];
+    newFileInputs[index].file = file;
+
     if (newFileObjects.length - 1 === index && newFileObjects.length < 5) {
       newFileObjects.push({ file: null, description: "" });
+      newFileInputs.push({ file: null, description: "" });
     } else if (newFileObjects.length >= 5) {
       setErrorMessage("Limite máximo de 5 arquivos por pedido.");
     }
+
     setFileObjects(newFileObjects);
+    setFileInputs(newFileInputs);
   };
 
 
-  const handleDescriptionChange = (index, description) => {
+  const handleRemoveFile = (index) => {
+    const newFileInputs = [...fileInputs];
+    newFileInputs.splice(index, 1);
+    if (newFileInputs.length === 0) {
+      newFileInputs.push({ file: null, description: "" });
+    }
+    setFileInputs(newFileInputs);
+  };
+
+  const handleDescriptionChange = (e, index) => {
+    const description = e.target.value;
+
     const newFileObjects = [...fileObjects];
-    newFileObjects[index].description = description;
-    setFileObjects(newFileObjects);
+    const newFileInputs = [...fileInputs];
+
+    // Verificando se o objeto existe antes de definir a descrição
+    if (newFileObjects[index] && newFileInputs[index]) {
+      newFileObjects[index].description = description;
+      newFileInputs[index].description = description;
+
+      setFileObjects(newFileObjects);
+      setFileInputs(newFileInputs);
+    } else {
+      console.error(
+        `Não foi possível encontrar um objeto de arquivo no índice ${index}`
+      );
+    }
   };
+
 
 
   useEffect(() => {
@@ -106,7 +144,7 @@ const AddEditOrderModal = ({ document, show, handleClose }) => {
     if (name === "nipc" && user.profil === "3") {
       return;
     }
-    console.log(`Atualizando o valor de ${name} para ${value}`);
+    // console.log(`Atualizando o valor de ${name} para ${value}`);
 
     setDocumentData((prevDocumentData) => ({
       ...prevDocumentData,
@@ -120,18 +158,14 @@ const AddEditOrderModal = ({ document, show, handleClose }) => {
     Object.entries(documentData).forEach(([key, value]) => {
       formData.append(key, value);
     });
-    formData.append("memo", documentData.memo);
-    console.log(
-      `Adicionando documento com os seguintes dados:`,
-      documentData
-    );
-    // Adicione esta seção para adicionar os arquivos ao objeto FormData
+    // console.log(`Adicionando documento com os seguintes dados:`, documentData);
     fileObjects.forEach((fileObject, index) => {
       if (fileObject.file) {
         formData.append("files", fileObject.file);
         formData.append("fileDescriptions", fileObject.description);
       }
     });
+    // console.log([...formData.entries()]);
     OrdersService.addDocument(formData)
       .then((res) => {
         handleClose();
@@ -158,7 +192,7 @@ const AddEditOrderModal = ({ document, show, handleClose }) => {
           text: errorMessage,
           confirmButtonText: "OK",
           footer:
-            '<a href="/entity">Deve criar primeiro entidade e só depois inserir o pedido.</a>',
+            '<a href="/entity">Deve criar primeiro a entidade e só depois inserir o pedido.</a>',
         });
       });
   };
@@ -209,56 +243,68 @@ const AddEditOrderModal = ({ document, show, handleClose }) => {
               </FloatingLabel>
             </Form.Group>
           ))}
-          {fileObjects.map((fileObject, index) => (
-            <div key={index}>
-              <Form.Group className="mb-3">
-                <FloatingLabel
-                  controlId={`file-${index}`}
-                  label={`Anexo ${index + 1}`}
-                >
-                  <Form.Control
-                    type="file"
-                    onChange={(e) => handleFileChange(index, e.target.files[0])}
-                  />
-                </FloatingLabel>
-              </Form.Group>
-              {fileObject.file && (
-                <Form.Group className="mb-3">
-                  <FloatingLabel
-                    controlId={`file-description-${index}`}
-                    label={`Descrição do Anexo ${index + 1}`}
-                  >
-                    <Form.Control
-                      type="text"
-                      value={fileObject.description}
-                      onChange={(e) =>
-                        handleDescriptionChange(index, e.target.value)
-                      }
-                    />
-                  </FloatingLabel>
-                </Form.Group>
-              )}
-              {fileObject.file &&
-                index === fileObjects.length - 1 &&
-                fileObjects.length < 5 && (
+          {fileInputs.map((fileInput, index) => {
+            const fileInputRef = React.createRef();
+
+            return (
+              <Row key={index}>
+                <Col>
                   <Form.Group className="mb-3">
-                    <FloatingLabel
-                      controlId={`file-${index + 1}`}
-                      label={`Anexo ${index + 2}`}
-                    >
-                      <Form.Control
+                    <InputGroup>
+                      <InputGroup.Text>
+                        <BsFolderPlus
+                          size={16}
+                          style={{ cursor: "pointer" }}
+                          onClick={() => fileInputRef.current.click()}
+                        />
+                      </InputGroup.Text>
+                      <FloatingLabel
+                        controlId={`floatingFileInput${index}`}
+                        label={`${index + 1}º Arquivo `}
+                      >
+                        <FormControl
+                          type="text"
+                          value={fileInput.file ? fileInput.file.name : ""}
+                          placeholder="Nenhum arquivo selecionado"
+                          readOnly
+                        />
+                      </FloatingLabel>
+                      <FormControl
                         type="file"
-                        onChange={(e) =>
-                          handleFileChange(index + 1, e.target.files[0])
-                        }
+                        ref={fileInputRef}
+                        onChange={(e) => handleFileChange(e, index)}
+                        hidden
                       />
-                    </FloatingLabel>
-                </Form.Group>
-                )}
-            </div>
-          )
-          )}
-          {errorMessage && <p>{errorMessage}</p>} 
+                      {fileInput.file && (
+                        <InputGroup.Text
+                          onClick={() => handleRemoveFile(index)}
+                        >
+                          <BsTrash hover/>
+                        </InputGroup.Text>
+                      )}
+                    </InputGroup>
+                  </Form.Group>
+                  {fileInput.file && (
+                    <Form.Group className="mb-3">
+                      <FloatingLabel
+                        controlId={`floatingDescription${index}`}
+                        label={`Descrição do Arquivo ${index + 1}º`}
+                      >
+                        <Form.Control
+                          type="text"
+                          value={fileInput.description || ""}
+                          onChange={(e) => handleDescriptionChange(e, index)}
+                          placeholder=" "
+                        />
+                      </FloatingLabel>
+                    </Form.Group>
+                  )}
+                </Col>
+              </Row>
+            );
+          })}
+
+          {errorMessage && <p>{errorMessage}</p>}
           <Button type="submit">Adicionar Pedido</Button>
         </Form>
       </Modal.Body>

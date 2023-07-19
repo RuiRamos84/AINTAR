@@ -1,8 +1,9 @@
-# /myapp/main.py
+# backend/main.py
 
 from api import app
 import eventlet
 
 
 if __name__ == '__main__':
-    eventlet.wsgi.server(eventlet.listen(('', 5000)), app)
+    eventlet.wsgi.server(eventlet.listen(('0.0.0.0', 5000)), app)
+

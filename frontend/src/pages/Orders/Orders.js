@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Table, Button, Pagination, Container, Row } from "react-bootstrap";
-import { PencilSquare, CaretUpFill, CaretDownFill,} from "react-bootstrap-icons";
+import { InfoSquare, CaretUpFill, CaretDownFill,} from "react-bootstrap-icons";
 import OrdersService from "../../services/OrderService";
 import SearchBar from "../SearchBar/SearchBar";
 import AddEditOrderModal from "./AddOrderModal";
@@ -198,7 +198,7 @@ const OrdersList = () => {
         </div>
       </div>
       <div className="table-responsive">
-        <Table  striped bordered hover className="relative-container table-sm">
+        <Table striped bordered hover className="relative-container table-sm">
           <thead className="table-dark">
             <tr>
               {displayFields.map((fieldName) => (
@@ -224,7 +224,7 @@ const OrdersList = () => {
                     variant="none"
                     onClick={() => handleViewClick(document)}
                   >
-                    <PencilSquare />
+                    <InfoSquare />
                   </Button>
                 </td>
               </tr>

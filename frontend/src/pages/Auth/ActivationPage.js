@@ -40,9 +40,9 @@ function ActivationPage() {
         <p>Ativando...</p>
       ) : ativacaoConcluida ? (
         <p>
-          A ativação foi concluída com sucesso!
+          Ativação concluída com sucesso!
           <br />
-          Agora você pode fazer login para acessar a aplicação.
+          Já pode fazer login para aceder à aplicação.
           <br />
           Será redirecionado para a página principal em 5 segundos.
         </p>

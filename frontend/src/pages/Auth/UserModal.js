@@ -50,11 +50,12 @@ const UserModal = ({ showModal, handleCloseModal, switchToLoginModal }) => {
       setButtonText("A criar a Conta...");
       const response = await authService.createUser(userData);
       if (response.status === 201) {
-        Swal.fire(
-          "A conta foi criada com sucesso.",
-          "Foi enviado um e-mail com um link para ativar sua conta. Verifique o seu e-mail e siga as instruções para ativar a sua conta antes de utilizar o sistema.",
-          "success"
-        );
+        Swal.fire({
+          title: "A conta foi criada com sucesso.",
+          text: "Foi enviado um e-mail com um link para ativar sua conta. Verifique o seu e-mail e siga as instruções para ativar a sua conta antes de utilizar o sistema.",
+          icon: "success",
+          confirmButtonText: "OK",
+        });
         setUserData({
           name: "",
           nipc: "",

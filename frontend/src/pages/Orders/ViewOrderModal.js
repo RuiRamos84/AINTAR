@@ -4,32 +4,21 @@ import { AuthContext } from "../../context/AuthContext";
 import { fieldMappings } from "../../utils/Utils";
 
 const ViewOrderModal = ({ document: doc, show, handleClose }) => {
-  const authContext = useContext(AuthContext);
+  const { user, metadata } = useContext(AuthContext);
   const [localDocument, setLocalDocument] = useState(doc);
 
-
   useEffect(() => {
-    if (
-      authContext.metadata &&
-      authContext.metadata.who &&
-      authContext.metadata.what &&
-      doc
-    ) {
-      const whoInfo = authContext.metadata.who.find(
-        (who) => who.pk === doc.who
-      );
-      const whatInfo = authContext.metadata.what.find(
-        (what) => what.pk === doc.what
-      );
+    if (metadata && metadata.who && metadata.what && doc) {
+      const whoInfo = metadata.who.find((who) => who.pk === doc.who);
+      const whatInfo = metadata.what.find((what) => what.pk === doc.what);
+      console.log(whatInfo)
       setLocalDocument((prevDocument) => ({
         ...prevDocument,
         who: whoInfo ? whoInfo.name : prevDocument.who,
         what: whatInfo ? whatInfo.step : prevDocument.what,
       }));
     }
-  }, [authContext, doc]);
-
-
+  }, [metadata, doc]);
 
   const getLabel = (fieldName) => {
     const field = fieldMappings.find((field) => field.name === fieldName);
@@ -43,6 +32,14 @@ const ViewOrderModal = ({ document: doc, show, handleClose }) => {
       </Modal.Header>
       <Modal.Body>
         {Object.keys(localDocument).map((key) => {
+          // Não renderizar campos específicos para o perfil 3
+          if (
+            user.profil === "3" &&
+            (key === "type_countyear" ||
+              key === "type_countall" ||
+              key === "who" )
+          )
+            return null;
           if (key === "pk") return null;
           return (
             <p key={key}>

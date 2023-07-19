@@ -5,7 +5,8 @@ const OrdersService = {
   addDocument: (documentData) =>
     axios.post("/documents", documentData, {
       headers: { "Content-Type": "multipart/form-data" },
-    }),
+    }),  
+  getMyOwnerRequests: () => axios.get("/document_owner"),
   getMyRequests: () => axios.get("/document_self"),
   getDocumentStep: (pk) => axios.post(`/get_document_step/${pk}`),
   createOrUpdateDocumentStep: (pk, documentStepData) => {
@@ -27,7 +28,7 @@ const OrdersService = {
   },
   downloadFile: (regnumber, pk, filename) =>
     axios({
-      url: `/download_file/${regnumber}/${pk}`,
+      url: `/download_file/${pk}/${regnumber}`,
       method: "GET",
       responseType: "blob", // Isso é importante
     }).then((response) => {

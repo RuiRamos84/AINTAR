@@ -20,8 +20,7 @@ const Home = () => {
         <div>
           <p>Esta é a página inicial da minha aplicação.</p>
           <p>Por favor, faça login para acessar o conteúdo personalizado.</p>
-          <Link onClick={Login}>Login</Link>
-        </div>
+          </div>
       )}
     </div>
   );

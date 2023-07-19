@@ -103,3 +103,5 @@ document_step_model = api.model('DocumentStep', {
     'who': fields.String(required=True, description='Quem'),
     'memo': fields.String(required=True, description='Memo')
 })
+
+

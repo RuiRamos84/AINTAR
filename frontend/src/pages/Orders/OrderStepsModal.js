@@ -1,13 +1,23 @@
 
 import React, { useState, useEffect, useContext, useRef } from "react";
-import { Modal, Button, Table, Form, Row, Col, FloatingLabel, Overlay, Tooltip } from "react-bootstrap";
+import {
+  InputGroup,
+  Modal,
+  Button,
+  Table,
+  Form,
+  Row,
+  Col,
+  FloatingLabel,
+  Overlay,
+  Tooltip,
+  FormControl,
+} from "react-bootstrap";
+import { BsTrash, BsFolderPlus } from "react-icons/bs";
 import { AuthContext } from "../../context/AuthContext";
 import { fieldMappings } from "../../utils/Utils";
 import { AlertContext } from "../../context/AlertContext";
 import OrdersService from "../../services/OrderService";
-
-
-
 
 
 const OrderStepModal = ({
@@ -39,10 +49,10 @@ const handleFileChange = (e, index) => {
     const newFileInputs = [...fileInputs];
     newFileInputs[index].file = files[0];
     newFileInputs[index].description = ""; // Limpar o campo de descrição
-    if (fileInputs.length >= 5) {
-      setErrorMessage("Limite máximo de 5 arquivos por pedido.");
-    } else {
+    if (fileInputs.length < 5) {
       newFileInputs.push({ file: null, description: "" });
+    } else {
+      setErrorMessage("Limite máximo de 5 arquivos iniciais por pedido.");
     }
     setFileInputs(newFileInputs);
     e.target.value = null; // Limpar o campo de arquivo
@@ -50,13 +60,23 @@ const handleFileChange = (e, index) => {
 };
 
 
+
 const handleDescriptionChange = (e, index) => {
   const { value } = e.target;
   const newFileInputs = [...fileInputs];
   newFileInputs[index].description = value;
   setFileInputs(newFileInputs);
-};
-
+  };
+  
+  const handleRemoveFile = (index) => {
+    const newFileInputs = [...fileInputs];
+    newFileInputs.splice(index, 1);
+    if (newFileInputs.length === 0) {
+      newFileInputs.push({ file: null, description: "" });
+    }
+    setFileInputs(newFileInputs);
+  };
+  
 
   // Atualize as listas formatadas sempre que o contexto for atualizado
   useEffect(() => {
@@ -293,37 +313,63 @@ const handleDescriptionChange = (e, index) => {
               </Form.Group>
             </Col>
           </Row>
-          <Row>
-            <Col>
-              {fileInputs.map((fileInput, index) => (
-                <div key={index}>
-                  <Form.Group className="mb-3">
-                    <Form.Label>Arquivo {index + 1}</Form.Label>
-                    <Form.Control
+          {fileInputs.map((fileInput, index) => (
+            <Row key={index}>
+              <Col>
+                <Form.Group className="mb-3">
+                  <InputGroup>
+                    <InputGroup.Text>
+                      <BsFolderPlus
+                        size={16}
+                        style={{ cursor: "pointer" }}
+                        onClick={() =>
+                          document
+                            .getElementById(`upload-button-${index}`)
+                            .click()
+                        }
+                      />
+                    </InputGroup.Text>
+                    <FormControl
+                      type="text"
+                      value={fileInput.file ? fileInput.file.name : ""}
+                      placeholder="Nenhum arquivo selecionado"
+                      readOnly
+                    />
+                    <FormControl
                       type="file"
                       onChange={(e) => handleFileChange(e, index)}
+                      hidden
+                      id={`upload-button-${index}`}
                     />
-                  </Form.Group>
-                </div>
-              ))}
-            </Col>
-            <Col>
-              {fileInputs.map((fileInput, index) => (
-                <div key={index}>
-                  {fileInput.file && (
-                    <Form.Group className="mb-3">
-                      <Form.Label>Descrição do Arquivo {index + 1}</Form.Label>
+                    {fileInput.file && (
+                      <InputGroup.Text onClick={() => handleRemoveFile(index)}>
+                        <BsTrash />
+                      </InputGroup.Text>
+                    )}
+                  </InputGroup>
+                  <Form.Label>Arquivo {index + 1}</Form.Label>
+                </Form.Group>
+              </Col>
+              <Col>
+                {fileInput.file && (
+                  <Form.Group className="mb-3">
+                    <FloatingLabel
+                      controlId={`floatingDescription${index}`}
+                      label={`Descrição do Arquivo ${index + 1}`}
+                    >
                       <Form.Control
                         type="text"
                         value={fileInput.description}
                         onChange={(e) => handleDescriptionChange(e, index)}
+                        placeholder=" "
                       />
-                    </Form.Group>
-                  )}
-                </div>
-              ))}
-            </Col>
-          </Row>
+                    </FloatingLabel>
+                  </Form.Group>
+                )}
+              </Col>
+            </Row>
+          ))}        
+          
           {errorMessage && <p>{errorMessage}</p>}
         </Form>
         {orderSteps.length > 0 ? (

@@ -19,6 +19,7 @@ const LoginModal = ({ showModal, handleCloseModal, switchToRegisterModal }) => {
     navigate("/password_recovery");
   };
 
+
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
@@ -52,13 +53,17 @@ const LoginModal = ({ showModal, handleCloseModal, switchToRegisterModal }) => {
         }      
     } catch (error) {
       showAlert({
-        icon: "error",
         title: "Oops...",
+        icon: "error",
+        position: "center",
         text: "Email ou password erradas!",
+        showConfirmButton: true,
         confirmButtonText: "OK",
+        allowOutsideClick: false,
       });
     }
   };
+
 
   return (
     <>
@@ -116,7 +121,7 @@ const LoginModal = ({ showModal, handleCloseModal, switchToRegisterModal }) => {
               onClick={handlePasswordRecovery}
               style={{ cursor: "pointer" }}
             >
-              Redefinir Password
+              Recuperar Password
             </span>
           </p>
         </Modal.Footer>

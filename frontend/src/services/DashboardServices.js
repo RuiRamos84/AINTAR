@@ -3,15 +3,14 @@ import axios from "axios";
 const DashboardService = {
   getViewData: async (view_id) => {
     try {
-      const response = await axios.get(
-        `http://localhost:5000/dashboard_data/${view_id}`
+      const response = await axios.get(`/dashboard_data/${view_id}`
       );
       const data = response.data.dados;
       // console.log('request', data)
       return data;
     } catch (error) {
       console.error("Erro ao buscar dados: ", error);
-      throw error; // Você pode querer lidar com esse erro de maneira diferente
+      throw error;
     }
   },
 

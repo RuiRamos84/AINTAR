@@ -3,9 +3,10 @@ import Swal from "sweetalert2";
 
 let isLoggedIn = false;
 
-const API_URL = "http://localhost:5000"; 
 
-axios.defaults.baseURL = API_URL;
+
+console.log(process.env.REACT_APP_API_URL);
+axios.defaults.baseURL = process.env.REACT_APP_API_URL;
 
 axios.defaults.headers.common["Content-Type"] = "application/json"; 
 
@@ -69,7 +70,7 @@ const createUser = async (userData) => {
     const response = await axios.post("/create_user_ext", userData);
     return response;
   } catch (error) {
-    console.error("Erro ao criar usuário: ", error);
+    console.error("Erro ao criar utilizador: ", error);
     throw error;
   }
 };
@@ -156,9 +157,6 @@ const refreshToken = async () => {
 };
 
 
-
-
-
 export async function getUserInfo() {
   try {
     const response = await axios.get("/user_info");
@@ -225,7 +223,7 @@ export const updateEntity = async (entityData) => {
 
 export const createEntity = async (entity) => {
   try {
-    const response = await axios.post("/api/entities", entity);
+    const response = await axios.post("/entities", entity);
     return response.data;
   } catch (error) {
     console.error("Erro ao criar entidade", error);

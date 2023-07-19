@@ -14,8 +14,9 @@ import ProfilePage from "./pages/Auth/Perfil";
 import Entitys from "./pages/Entitys/Entitys";
 import Documents from "./pages/Orders/Orders";
 import MyOrders from "./pages/Orders/MyOrders";
+import MyOrdersTasks from "./pages/Orders/MyOrdersTasks";
 import NotificationContextProvider from "./context/NotificationContext";
-import Dashboard from "./pages/Dashboard/Dashboard"
+import Dashboard from "./pages/Dashboard/Dashboard";
 
 import "./App.css";
 
@@ -32,78 +33,17 @@ const App = () => {
               <Layout>
                 <Routes>
                   <Route path="/" element={<Home />} />
-                  <Route
-                    path="/activation/:id/:activation_code"
-                    element={<ActivationPage />}
-                  />
-                  <Route
-                    path="/reset_password/"
-                    element={
-                      <PrivateRoute>
-                        <ResetPasswordPage />
-                      </PrivateRoute>
-                    }
-                  />
-                  <Route
-                    path="/password_recovery"
-                    element={<PasswordRecoveryPage />}
-                  />
-                  <Route
-                    path="/perfil"
-                    element={
-                      <PrivateRoute>
-                        <ProfilePage />
-                      </PrivateRoute>
-                    }
-                  />
-                  <Route
-                    path="/change_password"
-                    element={
-                      <PrivateRoute>
-                        <ChangePasswordPage />
-                      </PrivateRoute>
-                    }
-                  />
-                  <Route
-                    path="/entity"
-                    element={
-                      <PrivateRoute>
-                        <Entitys />
-                      </PrivateRoute>
-                    }
-                  />
-                  <Route
-                    path="/orders"
-                    element={
-                      <PrivateRoute>
-                        <Documents />
-                      </PrivateRoute>
-                    }
-                  />
-                  <Route
-                    path="/my_orders"
-                    element={
-                      <PrivateRoute>
-                        <MyOrders />
-                      </PrivateRoute>
-                    }
-                  />
-                  <Route
-                    path="/dashboard/:view_id"
-                    element={
-                      <PrivateRoute>
-                        <Dashboard />
-                      </PrivateRoute>
-                    }
-                  />
-                  <Route
-                    path="/dashboard"
-                    element={
-                      <PrivateRoute>
-                        <Dashboard view_id="general" />
-                      </PrivateRoute>
-                    }
-                  />
+                  <Route path="/activation/:id/:activation_code" element={<ActivationPage />}/>
+                  <Route path="/reset_password/" element={<PrivateRoute><ResetPasswordPage /></PrivateRoute>}/>
+                  <Route path="/password_recovery" element={<PasswordRecoveryPage />}/>
+                  <Route path="/perfil" element={<PrivateRoute><ProfilePage /></PrivateRoute>}/>
+                  <Route path="/change_password" element={<PrivateRoute><ChangePasswordPage /></PrivateRoute>}/>
+                  <Route path="/entity" element={<PrivateRoute><Entitys /></PrivateRoute>}/>
+                  <Route path="/orders" element={<PrivateRoute><Documents /></PrivateRoute>}/>
+                  <Route path="/my_orders" element={<PrivateRoute><MyOrders /></PrivateRoute>}/>
+                  <Route path="/my_orders_tasks" element={<PrivateRoute><MyOrdersTasks /></PrivateRoute>}/>
+                  <Route path="/dashboard/:view_id" element={<PrivateRoute><Dashboard /></PrivateRoute>}/>
+                  <Route path="/dashboard"element={<PrivateRoute><Dashboard view_id="general" /></PrivateRoute>}/>
                 </Routes>
               </Layout>
             </Router>

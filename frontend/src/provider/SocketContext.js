@@ -3,7 +3,7 @@
 import React, { createContext, useState, useEffect, useContext } from "react";
 import { io } from "socket.io-client";
 import { NotificationContext } from "../context/NotificationContext";
-import NotificationService from "../context/NotificationContext";
+
 
 export const SocketContext = createContext();
 
@@ -13,13 +13,13 @@ export function useSocket() {
 
 export function SocketProvider({ id, children }) {
   // console.log(id);
-  const { incrementOrderCount, fetchNotifications } =
+  const { incrementOrderCount } =
     useContext(NotificationContext);
   const [socket, setSocket] = useState();
   
-  
+  console.log(process.env.REACT_APP_SOCKET);
   useEffect(() => {    
-    const newSocket = io("http://localhost:5000", { query: { id } });
+    const newSocket = io(process.env.REACT_APP_SOCKET, { query: { id } });
     setSocket(newSocket);
     newSocket.on("connect", () => {
       // console.log("Conectado ao servidor WebSocket");

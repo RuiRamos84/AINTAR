@@ -25,21 +25,21 @@ export const AlertProvider = ({ children }) => {
       setAlert({
         show: true,
         variant: options.variant,
-        message: options.message,
-        footer: options.message,
-        
+        message: options.message,        
       });
     } else if (options.icon && options.title) {
       Swal.fire({
         icon: options.icon,
-        position: options.position,
+        position: options.position || "center",
         title: options.title,
-        showConfirmButton: options.value,
         timer: options.timer,
         text: options.text,
+        showConfirmButton: options.text,
         confirmButtonText: options.confirmButtonText,
         willClose: options.willClose,
-        footer:options.footer,
+        allowOutsideClick: options.text,
+        footer: options.footer,
+      
       });
     } else {
       console.error("Opções inválidas para showAlert");

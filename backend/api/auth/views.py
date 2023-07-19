@@ -92,35 +92,22 @@ class Login(Resource):
         username = data.get('username')
         password = data.get('password')
         session, profil, error_message = fs_login(username, password)
-
         if session is None:
             formatted_error = format_message(
                 error_message) if error_message else 'Utilizador ou password incorretos'
             return {'error': formatted_error}, 401
-
         is_temp = is_temp_password(password)
-
-        # Adicionando valores separados ao token
         additional_claims = {"session": session, "profil": profil}
         access_token = create_access_token(
             identity=session, additional_claims=additional_claims)
         refresh_token = create_refresh_token(
-            identity=session, additional_claims=additional_claims)
-        
-        # Set session
+            identity=session, additional_claims=additional_claims)       
         fs_setsession(session)
-
-        # Get user info
         user_info_query = text("SELECT * FROM vsl_client$self")
         user_info_result = db.session.execute(user_info_query).fetchone()
-
-
-        # You can get the 'pk' like this:
         user_id = user_info_result.pk if user_info_result else None
         user_name = user_info_result.client_name if user_info_result else None
         notification_count = user_info_result.notification if user_info_result else None
-
-        # Then you can return it with the response:
         return jsonify({
             'user_id': user_id, 'user_name': user_name, 'profil': profil, 'is_temp': is_temp,
             'access_token': access_token, 'refresh_token': refresh_token, 'notification_count': notification_count
@@ -686,6 +673,7 @@ class Documents(Resource):
         try:
             # Extrair os dados do pedido do corpo da solicitação
             data = request.form
+            print ('data: ', data)
 
             # Verificar se o NIPC existe na tabela vbf_entity
             nipc = data['nipc']
@@ -694,27 +682,27 @@ class Documents(Resource):
                 entity_query, {'nipc': nipc}).fetchone()
 
             if entity_result:
-                # O NIPC existe, então podemos prosseguir com a criação do pedido
-
                 # Extrair a coluna "pk" da tabela vbf_entity
                 ts_entity = entity_result.pk
                 tt_type = data['tt_type']
                 ts_associate = data['ts_associate']
                 memo = data['memo']
-
+                
+                print('memo: ', memo)
                 # Gerar um valor de PK usando a função fs_nextcode()
                 pk_query = text("SELECT aintar_server.fs_nextcode()")
                 pk_result = db.session.execute(pk_query).scalar()
+                print('pk:', pk_result)
 
                 # Inserir o novo pedido na tabela
                 insert_query = text(
-                    "INSERT INTO aintar_server.vbf_document (pk, ts_entity, tt_type, ts_associate, memo) "
-                    "VALUES (:pk, :ts_entity, :tt_type, :ts_associate, :memo)"
+                    """INSERT INTO aintar_server.vbf_document (pk, ts_entity, tt_type, ts_associate, memo) 
+                    VALUES (:pk, :ts_entity, :tt_type, :ts_associate, :memo)"""
                 )
                 db.session.execute(
                     insert_query,
                     {'pk': pk_result, 'ts_entity': ts_entity, 'tt_type': tt_type,
-                        'ts_associate': ts_associate, 'memo': memo}
+                        'ts_associate': ts_associate, 'memo': memo }
                 )
                 db.session.commit()
 
@@ -733,18 +721,17 @@ class Documents(Resource):
                 file_descriptions = request.form.getlist(
                     'fileDescriptions')  # Obter as descrições dos arquivos
 
-                for index, file in enumerate(files[:5]):  # Limitar ao máximo 5 arquivos
+                for i, file in enumerate(files[:5]):  # Limitar ao máximo 5 arquivos
                     # Gerar o filename usando a função aintar_server.fbo_document_stepannex()
                     filename_query = text(
-                        "SELECT aintar_server.fbo_document_stepannex(:d, :t, :m)")
-
-                    # Usar a descrição do arquivo se disponível, caso contrário usar 'file description'
-                    file_description = file_descriptions[index] if index < len(
+                        "SELECT aintar_server.fbo_document_stepannex(:d, :t, :m, :e)")
+                    description = file_descriptions[i] if i < len(
                         file_descriptions) else 'file description'
-
+                    extension = str(os.path.splitext(file.filename)[1])
+                    print(extension)
                     filename_result = db.session.execute(
-                        filename_query, {'d': pk_result, 't': 2, 'm': file_description}).scalar()
-
+                        filename_query, {'d': pk_result, 't': 2, 'm': description, 'e': extension}).scalar()
+                    db.session.commit()
                     # Adicione a extensão original do arquivo ao filename
                     extension = os.path.splitext(file.filename)[1]
                     filename_result += extension
@@ -862,6 +849,43 @@ class DocumentSelf(Resource):
                 return {'mensagem': 'Não existem Pedidos atribuídos a si'}, 200
         except Exception as e:
             return {'erro': f"Erro ao obter lista de document_self: {str(e)}"}, 500
+        
+
+@ns.route('/document_owner', endpoint='DocumentOwner')
+class DocumentSelf(Resource):
+    @ns.doc('list_document_owner')
+    @token_required
+    @set_session
+    @ns.response(200, 'Lista de pedido criados por si obtida com sucesso')
+    @ns.response(400, 'Não existem Pedidos criados por si')
+    def get(self, session_id):
+        """Obter a lista de pedidos criados pelo utilizador logado"""
+        try:
+            fs_session = text("SELECT * FROM fs_session()")
+            db.session.execute(fs_session).fetchone()
+            document_self_query = text("SELECT * FROM vbl_document$owner")
+            document_self_result = db.session.execute(
+                document_self_query).fetchall()
+
+            if document_self_result:
+                document_self_list = []
+                for document in document_self_result:
+                    document_dict = document._asdict()
+
+                    # Converter objetos datetime em strings
+                    if isinstance(document_dict["submission"], datetime):
+                        document_dict["submission"] = document_dict["submission"].isoformat(
+                        )
+
+                    document_self_list.append(document_dict)
+
+                    db.session.commit()
+
+                return {'document_owner': document_self_list}, 200
+            else:
+                return {'mensagem': 'Não existem Pedidos criados por si'}, 200
+        except Exception as e:
+            return {'erro': f"Erro ao obter lista de document_owner: {str(e)}"}, 500
 
 
 @ns.route('/get_document_step/<int:pk>', endpoint='GetDocumentStep')
@@ -934,7 +958,7 @@ class CreateOrUpdateDocumentStep(Resource):
                     update_query,
                     {'pk': pk, 'memo': memo}
                 )
-                print('update realizado')
+                # print('update realizado')
                 db.session.commit()
 
 
@@ -946,9 +970,9 @@ class CreateOrUpdateDocumentStep(Resource):
                 handle_file_upload(files, pk_result, tb_document)
             # Finalmente, se 'who' e 'what' forem fornecidos, insira o novo movimento
             if who and what:
-                print('novo passo iniciado')
+                # print('novo passo iniciado')
                 insert_new_movement(who, what, pk_result, tb_document)
-                print('novo passo terminado')
+                # print('novo passo terminado')
                 db.session.commit()         
 
             # Se chegamos aqui, tudo foi bem-sucedido
@@ -958,7 +982,7 @@ class CreateOrUpdateDocumentStep(Resource):
             return {'erro': f"Erro ao criar ou atualizar o passo do documento: {str(e)}"}, 500
 
 
-@ns.route('/download_file/<string:regnumber>/<int:pk>', endpoint='DownloadFile')
+@ns.route('/download_file/<int:pk>/<string:regnumber>', endpoint='DownloadFile')
 class DownloadFile(Resource):
     @ns.doc('download_file')
     @token_required
@@ -971,14 +995,17 @@ class DownloadFile(Resource):
             # Procurar o arquivo na base de dados.
             # Você precisa implementar esta função.
             file_info = get_file_info_from_database(pk)
+            print("file_info", file_info)
 
             # Garanta que o nome do arquivo seja seguro para usar em sistemas de arquivos.
             filename = secure_filename(file_info.filename)
+            print("filename", filename)
 
             # Crie um caminho seguro para o arquivo.
             # Suponha que "UPLOAD_FOLDER" seja o diretório onde você armazena os arquivos carregados.
             UPLOAD_FOLDER = os.getenv('UPLOAD_FOLDER')
             file_path = os.path.join(UPLOAD_FOLDER, regnumber, filename)
+            print(file_path)
 
             # Verifique se o arquivo existe.
             if os.path.exists(file_path):
@@ -1002,22 +1029,13 @@ class DashboardData(Resource):
     def get(self, view_id):
         """Retorna os dados da visualização especificada."""
         try:
-            # Verifique se o view_id é válido
             if not 1 <= int(view_id) <= 9:
                 return {'erro': "ID da vista inválido."}, 400
-
-            # Formate a consulta para a vista apropriada
             query = db.text(
                 f"SELECT * FROM aintar_server.vbr_document_00{view_id}")
             result = db.session.execute(query)
-
-            # Transforme o resultado em um dicionário
             data = [dict(zip(result.keys(), row)) for row in result]
-
-            # Converta os dados para uma string JSON usando DateTimeEncoder
             json_data = json.dumps({'dados': data}, cls=DateTimeEncoder)
-
             return Response(response=json_data, status=200, mimetype="application/json")
-
         except Exception as e:
             return {'erro': str(e)}, 500

@@ -35,7 +35,7 @@ const MyOrdersList = () => {
   const { user } = useContext(AuthContext);
   const { resetOrderCount } = useContext(NotificationContext);
   
-
+  
 
   const displayFields = [
     "regnumber",
@@ -48,10 +48,10 @@ const MyOrdersList = () => {
 
   const fetchDocuments = async () => {
     try {
-      const documentsResponse = await OrdersService.getMyRequests();
+      const documentsResponse = await OrdersService.getMyOwnerRequests();
       const metadataResponse = await getMetaData("order");
-      const userDocuments = documentsResponse.data.document_self.filter(
-        (document) => document.who === user.user_id
+      const userDocuments = documentsResponse.data.document_owner.filter(
+        (document) => document
       );
       setDocuments(userDocuments);
       setMetadata(metadataResponse);
@@ -63,14 +63,14 @@ const MyOrdersList = () => {
 
     useEffect(() => {
       fetchDocuments();
-      resetOrderCount();
+      // resetOrderCount();
     }, []);
 
     useEffect(() => {
       if (isOrderUpdated) {
         fetchDocuments();
         setIsOrderUpdated(false); // Redefinir para falso
-        resetOrderCount();
+        // resetOrderCount();
       }
     }, [isOrderUpdated]);
 
@@ -112,14 +112,26 @@ const MyOrdersList = () => {
     handleOrderStepModalClose(true);
   };
 
+const sortedDocuments = filteredResults.sort((a, b) => {
+  if (sortColumn) {
+    const valueA = (a[sortColumn] || "").toString().toLowerCase();
+    const valueB = (b[sortColumn] || "").toString().toLowerCase();
+    return (
+      valueA.localeCompare(valueB, "pt", { sensitivity: "base" }) *
+      (sortDirection === "asc" ? 1 : -1)
+    );
+  }
+  return 0;
+});
 
 
   const indexOfLastDocument = currentPage * documentsPerPage;
   const indexOfFirstDocument = indexOfLastDocument - documentsPerPage;
-  const currentDocuments = filteredResults.slice(
+  const currentDocuments = sortedDocuments.slice(
     indexOfFirstDocument,
     indexOfLastDocument
   );
+
 
   const indexOfLastEntity = currentPage * documentsPerPage;
   const indexOfFirstEntity = indexOfLastEntity - documentsPerPage;
@@ -177,20 +189,29 @@ const MyOrdersList = () => {
   useEffect(() => {
     const updateFilteredResults = () => {
       if (Array.isArray(documents)) {
-        setFilteredResults(
-          documents.filter((linha) =>
-            Object.values(linha).some(
-              (valor) =>
-                valor !== null &&
-                valor.toString().toLowerCase().includes(searchTerm.toLowerCase())
-            )
+        const newFilteredResults = documents.filter((linha) =>
+          Object.values(linha).some(
+            (valor) =>
+              valor !== null &&
+              valor.toString().toLowerCase().includes(searchTerm.toLowerCase())
           )
         );
+        setFilteredResults(newFilteredResults);
+
+        // Se a página atual é maior do que o total de páginas após a filtragem,
+        // redefina a página atual para 1
+        const newTotalPages = Math.ceil(
+          newFilteredResults.length / documentsPerPage
+        );
+        if (currentPage > newTotalPages) {
+          setCurrentPage(1);
+        }
       }
     };
     updateFilteredResults();
-    setCurrentPage(1);
   }, [searchTerm, documents]);
+
+
 
 
   const renderSortCaret = (column) => {
@@ -209,18 +230,7 @@ const MyOrdersList = () => {
     return field ? field.label : fieldName;
   };  
 
-  const sortedDocuments = currentDocuments.sort((a, b) => {
-    if (sortColumn) {
-      const valueA = (a[sortColumn] || "").toString().toLowerCase();
-      const valueB = (b[sortColumn] || "").toString().toLowerCase();
-      return (
-        valueA.localeCompare(valueB, "pt", { sensitivity: "base" }) *
-        (sortDirection === "asc" ? 1 : -1)
-      );
-    }
-    return 0;
-  });
-
+  
   return (
     <div className="en-container">
       <div
@@ -251,8 +261,8 @@ const MyOrdersList = () => {
             </tr>
           </thead>
           <tbody className="text-center">
-            {sortedDocuments.length > 0 ? (
-              sortedDocuments.map((document) => (
+            {currentDocuments.length > 0 ? (
+              currentDocuments.map((document) => (
                 <tr key={document.pk}>
                   {displayFields
                     .map((fieldName) =>
@@ -268,12 +278,12 @@ const MyOrdersList = () => {
                     >
                       <InfoSquare />
                     </Button>
-                    <Button
+                    {/* <Button
                       variant="none"
                       onClick={() => handleHistoryClick(document)}
                     >
                       <PencilSquare />
-                    </Button>
+                    </Button> */}
                   </td>
                 </tr>
               ))

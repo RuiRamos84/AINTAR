@@ -10,7 +10,6 @@ export const AuthContext = createContext();
 const AuthContextProvider = (props) => {
   const [user, setUser] = useState(null);
   const [metadata, setMetadata] = useState(null);
-  const [orderCount, setOrderCount] = useState(0);
   const socket = useSocket();
   const { fetchNotifications } = React.useContext(NotificationContext);
 
@@ -18,7 +17,7 @@ const AuthContextProvider = (props) => {
     const user = JSON.parse(localStorage.getItem("user"));
     if (user) {
       setUser(user);
-      getMetaData("types").then((data) => setMetadata(data));
+      getMetaData("order").then((data) => setMetadata(data));
     }
   }, []);
 

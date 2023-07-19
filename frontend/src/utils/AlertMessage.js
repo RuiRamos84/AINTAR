@@ -2,10 +2,6 @@ import React, { useEffect, useState, useRef } from "react";
 import { Alert } from "react-bootstrap";
 import Swal from "sweetalert2";
 
-
-
-
-
 const AlertMessage = ({
   type = "bootstrap",
   variant = "success",
@@ -20,7 +16,7 @@ const AlertMessage = ({
   const [isVisible, setIsVisible] = useState(show);
   const alertRef = useRef(null);
   const [fadeOut, setFadeOut] = useState(false);
-  const [alertKey, setAlertKey] = useState(0);
+
   useEffect(() => {
     if (type === "sweet" && show) {
       const swalOptions = {
@@ -52,41 +48,23 @@ const AlertMessage = ({
     onConfirm,
     onCancel,
     onClose,
-    alertKey,
   ]);
 
-  const showAlert = () => {
-    setAlertKey((prevKey) => prevKey + 1);
-    setFadeOut(false);
-    setTimeout(() => {
-      setFadeOut(true);
-    }, 3000);
-    setTimeout(() => {
-      setIsVisible(false);
-    }, 6000);
-  };
-
-
-  const handleTransitionEnd = () => {
-    if (!isVisible) {
-      setIsVisible(false);
-      
-    }
-  };
-
   useEffect(() => {
-    if (isVisible) {
-      showAlert();
+    if (isVisible && type === "bootstrap") {
+      setTimeout(() => {
+        setFadeOut(true);
+      }, 3000);
+
       setTimeout(() => {
         setIsVisible(false);
-      }, 5000);
+      }, 6000);
     }
-  }, [isVisible]);
+  }, [isVisible, type]);
 
   useEffect(() => {
     setIsVisible(show);
   }, [show]);
-
 
   if (type === "bootstrap") {
     return (
@@ -98,16 +76,9 @@ const AlertMessage = ({
           opacity: isVisible ? (fadeOut ? 0 : 1) : 0,
           transition: "opacity 3s",
         }}
-        onTransitionEnd={handleTransitionEnd}
       >
         {message}
       </Alert>
-    );
-  } else if (type === "sweet" && show) {
-    return (
-      <div className={`alert-message${show ? " show" : ""}`}>
-        <p>{message}</p>
-      </div>
     );
   } else {
     return null;
@@ -115,4 +86,3 @@ const AlertMessage = ({
 };
 
 export default AlertMessage;
-

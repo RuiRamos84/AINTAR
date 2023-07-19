@@ -5,7 +5,7 @@ const AlertBadge = () => {
   const [newOrderCount, setNewOrderCount] = useState(0);
 
   useEffect(() => {
-    const socket = io("http://localhost:5000"); // Substitua pela URL do seu servidor
+    const socket = io("process.env.REACT_APP_API_URL"); // Substitua pela URL do seu servidor
     socket.on("new_order", (data) => {
       setNewOrderCount((prevCount) => prevCount + 1);
     });
