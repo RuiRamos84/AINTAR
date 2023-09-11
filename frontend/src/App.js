@@ -25,8 +25,8 @@ const App = () => {
   const userId = user ? user.user_id : null; 
 
   return (
-    <NotificationContextProvider>
-      <SocketProvider id={userId}>
+   <NotificationContextProvider>
+      <SocketProvider etProvider id={userId}>
         <AuthContextProvider>
           <AlertProvider>
             <Router>

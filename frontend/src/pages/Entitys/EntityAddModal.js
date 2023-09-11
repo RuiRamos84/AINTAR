@@ -50,7 +50,6 @@ const AddEditEntity = ({ entity, onClose, identTypes, entityFields }) => {
           {entityFields.map((fieldName) => {
             const field = fieldMappings.find((f) => f.name === fieldName);
             if (!field) return null;
-
             return (
               <Form.Group key={field.name}>
                 <FloatingLabel

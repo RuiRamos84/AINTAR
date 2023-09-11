@@ -21,7 +21,7 @@ from werkzeug.utils import secure_filename
 
 
 METADATA_TYPES = {
-    "ident_types": "SELECT * FROM aintar_server.vst_0001",
+    "ident_types": "SELECT * FROM vst_0001",
     "types": "SELECT * FROM vst_doctype order by value",
     "associates": "SELECT * FROM vsl_associate order by name",
     "what": "SELECT * FROM vst_document_step$what order by pk",
@@ -83,7 +83,7 @@ def fsf_client_notificationget():
 def fsf_client_notificationadd(user_id):
     try:
         result = db.session.execute(
-            text("SELECT aintar_server.fsf_client_notificationadd(:user_id)"),
+            text("SELECT fsf_client_notificationadd(:user_id)"),
             {"user_id": user_id},
         )
         s = result.fetchone()[0]
@@ -96,7 +96,7 @@ def fsf_client_notificationadd(user_id):
 def fsf_client_notificationclean(user_id):
     try:
         result = db.session.execute(
-            text("SELECT aintar_server.fsf_client_notificationclean(:user_id)"),
+            text("SELECT fsf_client_notificationclean(:user_id)"),
             {"user_id": user_id},
         )
         s = result.fetchone()[0]
@@ -165,10 +165,11 @@ def send_password_recovery_email(email, temp_token):
         print(f"Erro ao enviar o e-mail: {str(e)}")
         return False
 
-def fs_login(username, passwd):
+def fs_login(username, password):
     try:
-        result = db.session.execute(text("SELECT aintar_server.fs_login(:username, :passwd)"), {
-            'username': username, 'passwd': passwd})
+        print(username, password)
+        result = db.session.execute(text("SELECT fs_login(:username, :password)"), {
+            'username': username, 'password': password})
         s = result.fetchone()[0]
 
         if s is None:
@@ -197,7 +198,7 @@ def is_temp_password(password):
 
 def fs_logout(session):
     result = db.session.execute(
-        text("SELECT aintar_server.fs_logout(:session)"), {'session': session})
+        text("SELECT fs_logout(:session)"), {'session': session})
     db.session.commit()
     xml_response = result.fetchone()[0]
 
@@ -216,7 +217,7 @@ def fs_logout(session):
 
 def fs_setsession(session):
     try:
-        query = text("SELECT aintar_server.fs_setsession(:session)")
+        query = text("SELECT fs_setsession(:session)")
         result = db.session.execute(query, {"session": session})
         db.session.commit()
         first_row = result.fetchone()
@@ -279,7 +280,7 @@ def get_current_user():
 # Adicione a função fs_passwd_recover
 def fs_passwd_recover(email):
     try:
-        query = text("SELECT aintar_server.fs_passwd_recover(:e)")
+        query = text("SELECT fs_passwd_recover(:e)")
         result = db.session.execute(query, {"e": email}).scalar()
         db.session.commit()
 
@@ -306,7 +307,7 @@ def create_temp_password_token(temp_password):
 
 def update_password(old_password, new_password):
     # Chamar o procedimento armazenado fs_passwd_change para alterar a password do utilizador
-    query = text("SELECT aintar_server.fs_passwd_change(:o, :n)")
+    query = text("SELECT fs_passwd_change(:o, :n)")
     result = db.session.execute(
         query, {"o": old_password, "n": new_password}).scalar()
     db.session.commit()
@@ -346,9 +347,9 @@ def handle_file_upload(files, pk_result, tb_document):
         file_descriptions = request.form.getlist('descriptions')
         print('descrições:', file_descriptions)
         for i, file in enumerate(files[:5]):  # Limitar ao máximo 5 arquivos
-            # Gerar o filename usando a função aintar_server.fbo_document_stepannex()
+            # Gerar o filename usando a função fbo_document_stepannex()
             filename_query = text(
-                "SELECT aintar_server.fbo_document_stepannex(:d, :t, :m, :e)")
+                "SELECT fbo_document_stepannex(:d, :t, :m, :e)")
             description = file_descriptions[i] if i < len(
                 file_descriptions) else 'file description'
             extension = str(os.path.splitext(file.filename)[1])
@@ -384,7 +385,7 @@ def handle_file_upload(files, pk_result, tb_document):
 def insert_new_movement(who, what, pk_result, tb_document):
     """Inserir um novo movimento."""
     insert_query = text(
-        "INSERT INTO aintar_server.vbf_document_step (pk, tb_document, what, who) "
+        "INSERT INTO vbf_document_step (pk, tb_document, what, who) "
         "VALUES (:pk_result, :tb_document, :what, :who)"
     )
     db.session.execute(
@@ -396,7 +397,7 @@ def insert_new_movement(who, what, pk_result, tb_document):
 
 def get_file_info_from_database(pk):
     query = text(
-        "SELECT filename FROM aintar_server.vbl_document_step WHERE pk = :pk")
+        "SELECT filename FROM vbl_document_step WHERE pk = :pk")
     file_info = db.session.execute(query, {'pk': pk}).fetchone()
     return file_info
 

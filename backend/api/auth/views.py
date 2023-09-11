@@ -89,6 +89,7 @@ class Login(Resource):
         '''Faz o login do utilizador e retorna um token de acesso.'''
         from .. import api
         data = request.get_json()
+        print("data", data)
         username = data.get('username')
         password = data.get('password')
         session, profil, error_message = fs_login(username, password)
@@ -184,7 +185,7 @@ class CreateUser(Resource):
         try:
 
             query = text(
-                "SELECT aintar_server.fs_createuser_ext(:i, :n, :e, :p)")
+                "SELECT fs_createuser_ext(:i, :n, :e, :p)")
 
             result = db.session.execute(
                 query, {"i": nipc, "n": name, "e": email, "p": password}).scalar()
@@ -238,7 +239,7 @@ class ActivateUser(Resource):
     def get(self, id, activation_code):
         """Ativar um Utilizador"""
         try:
-            query = text("SELECT aintar_server.fs_validate(:i, :k)")
+            query = text("SELECT fs_validate(:i, :k)")
             result = db.session.execute(
                 query, {"i": id, "k": activation_code}).scalar()
 
@@ -291,7 +292,7 @@ class UserInfo(Resource):
 
             # Executar a consulta para obter as informações do utilizador
             user_query = text(
-                "SELECT * FROM aintar_server.vbf_entity WHERE pk = :i")
+                "SELECT * FROM vbf_entity WHERE pk = :i")
             user_result = db.session.execute(
                 user_query, {"i": user_id}).fetchone()
             ident_types_list = fetch_meta_data('ident_types')
@@ -348,9 +349,9 @@ class UserInfo(Resource):
             }
             ident_types_list = fetch_meta_data(tipo='ident_types')
 
-            # Atualizar os dados do utilizador na tabela aintar_server.vbf_entity
+            # Atualizar os dados do utilizador na tabela vbf_entity
             update_query = text("""
-                UPDATE aintar_server.vbf_entity
+                UPDATE vbf_entity
                 SET name = COALESCE(:name, name),
                     nipc = COALESCE(:nipc, nipc),
                     address = COALESCE(:address, address),
@@ -512,7 +513,7 @@ class Entities(Resource):
             fs_setsession(session_id)
             # Consultar todas as entidades usando a view vbf_entity
             entities_query = text(
-                "SELECT * FROM aintar_server.vbf_entity order by pk")
+                "SELECT * FROM vbf_entity order by pk")
             entities_result = db.session.execute(entities_query).fetchall()
             ident_types_list = fetch_meta_data('ident_types')
 
@@ -550,7 +551,7 @@ class Entities(Resource):
             ident_types_list = fetch_meta_data('ident_types')
 
             # Gerar um valor de PK usando a função fs_nextcode()
-            pk_query = text("SELECT aintar_server.fs_nextcode()")
+            pk_query = text("SELECT fs_nextcode()")
             pk_result = db.session.execute(pk_query).scalar()
             dados['pk'] = pk_result
 
@@ -640,7 +641,7 @@ class Documents(Resource):
         try:            
             # Consultar todos os documentos usando a view vbf_document
             documents_query = text(
-                "SELECT * FROM aintar_server.vbl_document order by pk")
+                "SELECT * FROM vbl_document order by pk")
             documents_result = db.session.execute(documents_query).fetchall()
 
             if documents_result:
@@ -690,13 +691,13 @@ class Documents(Resource):
                 
                 print('memo: ', memo)
                 # Gerar um valor de PK usando a função fs_nextcode()
-                pk_query = text("SELECT aintar_server.fs_nextcode()")
+                pk_query = text("SELECT fs_nextcode()")
                 pk_result = db.session.execute(pk_query).scalar()
                 print('pk:', pk_result)
 
                 # Inserir o novo pedido na tabela
                 insert_query = text(
-                    """INSERT INTO aintar_server.vbf_document (pk, ts_entity, tt_type, ts_associate, memo) 
+                    """INSERT INTO vbf_document (pk, ts_entity, tt_type, ts_associate, memo) 
                     VALUES (:pk, :ts_entity, :tt_type, :ts_associate, :memo)"""
                 )
                 db.session.execute(
@@ -722,9 +723,9 @@ class Documents(Resource):
                     'fileDescriptions')  # Obter as descrições dos arquivos
 
                 for i, file in enumerate(files[:5]):  # Limitar ao máximo 5 arquivos
-                    # Gerar o filename usando a função aintar_server.fbo_document_stepannex()
+                    # Gerar o filename usando a função fbo_document_stepannex()
                     filename_query = text(
-                        "SELECT aintar_server.fbo_document_stepannex(:d, :t, :m, :e)")
+                        "SELECT fbo_document_stepannex(:d, :t, :m, :e)")
                     description = file_descriptions[i] if i < len(
                         file_descriptions) else 'file description'
                     extension = str(os.path.splitext(file.filename)[1])
@@ -747,7 +748,7 @@ class Documents(Resource):
 
                 # Obter o PK do who no novo pedido
                 who_id = db.session.execute(text(
-                    "SELECT who FROM aintar_server.vbf_document_step WHERE tb_document = :pk and ord = 0"), {'pk': pk_result}).scalar()
+                    "SELECT who FROM vbf_document_step WHERE tb_document = :pk and ord = 0"), {'pk': pk_result}).scalar()
 
                 db.session.commit()
 
@@ -900,7 +901,7 @@ class GetDocumentStep(Resource):
         try:
             # Consultar todos os passos do documento usando a view vbl_document_step
             document_step_query = text(
-                "SELECT * FROM aintar_server.vbl_document_step WHERE tb_document = :pk")
+                "SELECT * FROM vbl_document_step WHERE tb_document = :pk")
             document_step_result = db.session.execute(
                 document_step_query, {'pk': pk}).fetchall()
 
@@ -943,14 +944,14 @@ class CreateOrUpdateDocumentStep(Resource):
             document_step_result = db.session.execute(
                 document_step_query, {'pk': pk}).fetchone()
             # Gerar um valor de PK usando a função fs_nextcode()
-            pk_query = text("SELECT aintar_server.fs_nextcode()")
+            pk_query = text("SELECT fs_nextcode()")
             pk_result = db.session.execute(pk_query).scalar()
 
 
             # Se a memo existir e um registro de documento correspondente for encontrado, atualize a memo
             if document_step_result is not None and memo:
                 update_query = text(
-                    "UPDATE aintar_server.vbf_document_step "
+                    "UPDATE vbf_document_step "
                     "SET memo = :memo "
                     "WHERE pk = :pk"
                 )
@@ -1032,7 +1033,7 @@ class DashboardData(Resource):
             if not 1 <= int(view_id) <= 9:
                 return {'erro': "ID da vista inválido."}, 400
             query = db.text(
-                f"SELECT * FROM aintar_server.vbr_document_00{view_id}")
+                f"SELECT * FROM vbr_document_00{view_id}")
             result = db.session.execute(query)
             data = [dict(zip(result.keys(), row)) for row in result]
             json_data = json.dumps({'dados': data}, cls=DateTimeEncoder)
