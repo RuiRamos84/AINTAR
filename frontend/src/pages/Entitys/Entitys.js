@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Table, Button, Pagination, Container, Row } from "react-bootstrap";
+import { Table, Button, Pagination, Container, Row, Spinner } from "react-bootstrap";
 import {
   PencilSquare,
   CaretUpFill,
@@ -21,6 +21,7 @@ const EntitiesList = () => {
   const [filteredResults, setFilteredResults] = useState([]);
   const [sortColumn, setSortColumn] = useState(null);
   const [sortDirection, setSortDirection] = useState("asc");
+  const [loading, setLoading] = useState(true);
   const pageNumbers = [];
   const totalPages = Math.ceil(filteredResults.length / entitiesPerPage);
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
@@ -30,6 +31,7 @@ const EntitiesList = () => {
 
 
   const fetchEntities = () => {
+    setLoading(true);
     EntityService.getEntities()
       .then((res) => {
         setEntities(res.data.entities);
@@ -52,9 +54,11 @@ const EntitiesList = () => {
       })
       .catch((err) => {
         console.error(err);
+      })
+      .finally(() => {
+        setLoading(false); // Desativar o estado de carregamento, independentemente do resultado
       });
   };
-
 
 
   useEffect(fetchEntities, []);
@@ -193,78 +197,91 @@ const EntitiesList = () => {
           </Button>
         </div>
       </div>
-      <div className="table-responsive">
-        <Table striped bordered hover className="relative-container table-sm">
-          <thead className="table-dark">
-            <tr>
-              <th onClick={() => handleSort("nipc")}>
-                NIF {renderSortCaret("nipc")}
-              </th>
-              <th onClick={() => handleSort("name")}>
-                Nome {renderSortCaret("name")}
-              </th>
-              <th onClick={() => handleSort("phone")}>
-                Telefone {renderSortCaret("phone")}
-              </th>
-              <th onClick={() => handleSort("email")}>
-                Email {renderSortCaret("email")}
-              </th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody className="text-center">
-            {currentEntities.map((entity) => (
-              <tr key={entity.pk}>
-                <td>{entity.nipc}</td>
-                <td>{entity.name}</td>
-                <td>{entity.phone}</td>
-                <td>{entity.email}</td>
-                <td>
-                  <Button
-                    variant="none"
-                    onClick={() => handleEditClick(entity)}
-                  >
-                    <PencilSquare />
-                  </Button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </Table>
-      </div>
-      <Container>
-        <Row className="justify-content-center">
-          <Pagination
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            <Pagination.First
-              disabled={currentPage === 1}
-              onClick={() => paginate(1)}
-              
-            />
-            <Pagination.Prev
-              disabled={currentPage === 1}
-              onClick={() => paginate(currentPage - 1)}
-              
-            />
-            {pageNumbers}
-            <Pagination.Next
-              disabled={currentPage === totalPages}
-              onClick={() => paginate(currentPage + 1)}
-              
-            />
-            <Pagination.Last
-              disabled={currentPage === totalPages}
-              onClick={() => paginate(totalPages)}
-              
-            />
-          </Pagination>
-        </Row>
-      </Container>
+
+      {loading ? ( // Renderizar o spinner enquanto estiver carregando
+        <div class="d-flex justify-content-center">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+          <p>&nbsp;&nbsp;&nbsp;A carregar...</p>
+        </div>
+      ) : (
+        <>
+          <div className="table-responsive">
+            <Table
+              striped
+              bordered
+              hover
+              className="relative-container table-sm"
+            >
+              <thead className="table-dark">
+                <tr>
+                  <th onClick={() => handleSort("nipc")}>
+                    NIF {renderSortCaret("nipc")}
+                  </th>
+                  <th onClick={() => handleSort("name")}>
+                    Nome {renderSortCaret("name")}
+                  </th>
+                  <th onClick={() => handleSort("phone")}>
+                    Telefone {renderSortCaret("phone")}
+                  </th>
+                  <th onClick={() => handleSort("email")}>
+                    Email {renderSortCaret("email")}
+                  </th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody className="text-center">
+                {currentEntities.map((entity) => (
+                  <tr key={entity.pk}>
+                    <td>{entity.nipc}</td>
+                    <td>{entity.name}</td>
+                    <td>{entity.phone}</td>
+                    <td>{entity.email}</td>
+                    <td>
+                      <Button
+                        variant="none"
+                        onClick={() => handleEditClick(entity)}
+                      >
+                        <PencilSquare />
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          </div>
+          <Container>
+            <Row className="justify-content-center">
+              <Pagination
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <Pagination.First
+                  disabled={currentPage === 1}
+                  onClick={() => paginate(1)}
+                />
+                <Pagination.Prev
+                  disabled={currentPage === 1}
+                  onClick={() => paginate(currentPage - 1)}
+                />
+                {pageNumbers}
+                <Pagination.Next
+                  disabled={currentPage === totalPages}
+                  onClick={() => paginate(currentPage + 1)}
+                />
+                <Pagination.Last
+                  disabled={currentPage === totalPages}
+                  onClick={() => paginate(totalPages)}
+                />
+              </Pagination>
+            </Row>
+          </Container>
+        </>
+      )}
       {showModal && (
         <AddEditEntityModal
           entity={editingEntity}

@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { Table, Button, Pagination, Container, Row } from "react-bootstrap";
-import { InfoSquare, CaretUpFill, CaretDownFill,} from "react-bootstrap-icons";
+import { InfoSquare, CaretUpFill, CaretDownFill, BarChartSteps} from "react-bootstrap-icons";
 import OrdersService from "../../services/OrderService";
 import SearchBar from "../SearchBar/SearchBar";
 import AddEditOrderModal from "./AddOrderModal";
 import ViewDocumentModal from "./ViewOrderModal";
+import ViewOrderSteps from "./ViewOrderSteps";
 import { fieldMappings } from "../../utils/Utils"
+import OrderStepModal from "./OrderStepsModal";
 
 const OrdersList = () => {
   const [documents, setDocuments] = useState([]);
@@ -21,7 +23,7 @@ const OrdersList = () => {
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
   const [sortColumn, setSortColumn] = useState(null);
   const [sortDirection, setSortDirection] = useState("asc");
-
+  const [showStepsModal, setShowStepsModal] = useState(false);
 
   const displayFields = [
     "regnumber",
@@ -50,16 +52,25 @@ const OrdersList = () => {
     setShowAddModal(true);
   };
 
-  // Função para abrir o modal de visualização
-  const handleViewClick = (document) => {
+  // Função para abrir o modal de visualização de informações detalhadas
+  const handleInfoClick = (document) => {
     setEditingDocument(document);
     setShowViewModal(true);
+    setShowStepsModal(false);
+  };
+
+  // Função para abrir o modal de visualização de passos
+  const handleStepsClick = (document) => {
+    setEditingDocument(document);
+    setShowStepsModal(true);
+    setShowViewModal(false);
   };
 
   // Função para fechar os modais
   const handleModalClose = () => {
     setShowAddModal(false);
     setShowViewModal(false);
+    setShowStepsModal(false);
     fetchDocuments();
   };
 
@@ -173,12 +184,10 @@ const OrdersList = () => {
     return null;
   };
 
-
   const getLabel = (fieldName) => {
     const field = fieldMappings.find((field) => field.name === fieldName);
     return field ? field.label : fieldName;
   };
-  
 
   return (
     <div className="en-container">
@@ -222,7 +231,21 @@ const OrdersList = () => {
                 <td>
                   <Button
                     variant="none"
-                    onClick={() => handleViewClick(document)}
+                    onClick={() => {
+                      handleStepsClick(document);
+                      setShowStepsModal(true);
+                      setShowViewModal(false);
+                    }}
+                  >
+                    <BarChartSteps />
+                  </Button>
+                  <Button
+                    variant="none"
+                    onClick={() => {
+                      handleInfoClick(document);
+                      setShowViewModal(true);
+                      setShowStepsModal(false);
+                    }}
                   >
                     <InfoSquare />
                   </Button>
@@ -273,6 +296,14 @@ const OrdersList = () => {
           document={editingDocument}
           show={showViewModal}
           handleClose={handleModalClose}
+        />
+      )}
+      {showStepsModal && editingDocument && (
+        <ViewOrderSteps
+          show={showStepsModal}
+          handleClose={() => setShowStepsModal(false)}
+          orderStep={editingDocument}
+          regnumber={editingDocument ? editingDocument.regnumber : null}
         />
       )}
     </div>

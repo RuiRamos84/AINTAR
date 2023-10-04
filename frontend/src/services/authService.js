@@ -5,7 +5,7 @@ let isLoggedIn = false;
 
 
 
-console.log(process.env.REACT_APP_API_URL);
+// console.log(process.env.REACT_APP_API_URL);
 axios.defaults.baseURL = process.env.REACT_APP_API_URL;
 
 axios.defaults.headers.common["Content-Type"] = "application/json"; 
@@ -33,6 +33,7 @@ axios.interceptors.response.use(
     const originalRequest = error.config;
     if (
       error.response &&
+      error.response.status &&
       (error.response.status === 401 || error.response.status === 403) &&
       !originalRequest._retry &&
       !originalRequest.url.endsWith("/refresh")
@@ -51,12 +52,36 @@ axios.interceptors.response.use(
         };
         return axios(newRequest);
       } catch (err) {
+        // Renovação de token falhou, faça o logout do usuário
         logout();
+
+        // Exiba uma mensagem ao usuário
+        Swal.fire({
+          icon: "error",
+          title: "Erro de autenticação",
+          text: "Sua sessão expirou. Por favor, faça login novamente.",
+        }).then(() => {
+          // Redirecione para a página de login
+          window.location.href = "/"; // Altere para o URL da sua página de login
+        });
+
         return Promise.reject(err);
       }
     }
     if (originalRequest.url.endsWith("/refresh")) {
+      // Logout do usuário
       logout();
+
+      // Exiba uma mensagem ao usuário
+      Swal.fire({
+        icon: "error",
+        title: "Erro de autenticação",
+        text: "Sua sessão expirou. Por favor, faça login novamente.",
+      }).then(() => {
+        // Redirecione para a página de login
+        window.location.href = "/"; // Altere para o URL da sua página de login
+      });
+
       return Promise.resolve();
     }
     return Promise.reject(error);

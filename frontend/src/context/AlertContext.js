@@ -1,7 +1,13 @@
-import React, { createContext, useState, useCallback, useEffect } from "react";
-import Swal from "sweetalert2";
+import React, {
+  createContext,
+  useState,
+  useCallback,
+  useEffect,
+  useRef,
+} from "react";
 import { Alert } from "react-bootstrap";
 import { Transition } from "react-transition-group";
+import Swal from "sweetalert2";
 import "./AlertContext.css";
 
 export const AlertContext = createContext();
@@ -9,6 +15,9 @@ export const AlertContext = createContext();
 export const AlertProvider = ({ children }) => {
   const [alert, setAlert] = useState({ show: false, variant: "", message: "" });
   const [showing, setShowing] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
+  // const alertRef = useRef(null);
+  const [fadeOut, setFadeOut] = useState(false);
 
   useEffect(() => {
     if (alert.show) {
@@ -20,14 +29,28 @@ export const AlertProvider = ({ children }) => {
     }
   }, [alert]);
 
+  useEffect(() => {
+    if (isVisible) {
+      setTimeout(() => {
+        setFadeOut(true);
+      }, 3000);
+
+      setTimeout(() => {
+        setIsVisible(false);
+      }, 6000);
+    }
+  }, [isVisible]);
+
   const showAlert = useCallback((options) => {
     if (options.variant && options.message) {
       setAlert({
         show: true,
         variant: options.variant,
-        message: options.message,        
+        message: options.message,
       });
     } else if (options.icon && options.title) {
+      setIsVisible(true);
+
       Swal.fire({
         icon: options.icon,
         position: options.position || "center",
@@ -39,7 +62,8 @@ export const AlertProvider = ({ children }) => {
         willClose: options.willClose,
         allowOutsideClick: options.text,
         footer: options.footer,
-      
+      }).then(() => {
+        setIsVisible(false);
       });
     } else {
       console.error("Opções inválidas para showAlert");
@@ -62,7 +86,7 @@ export const AlertProvider = ({ children }) => {
 
   return (
     <AlertContext.Provider value={{ alert, showAlert }}>
-      <Transition in={showing} timeout={duration}>
+      <Transition in={showing || isVisible} timeout={duration}>
         {(state) => (
           <div
             style={{
@@ -71,7 +95,9 @@ export const AlertProvider = ({ children }) => {
             }}
             className="alert-container"
           >
-            <Alert variant={alert.variant}>{alert.message}</Alert>
+            {alert.variant ? (
+              <Alert variant={alert.variant}>{alert.message}</Alert>
+            ) : null}            
           </div>
         )}
       </Transition>

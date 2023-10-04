@@ -17,7 +17,7 @@ export function SocketProvider({ id, children }) {
     useContext(NotificationContext);
   const [socket, setSocket] = useState();
   
-  console.log(process.env.REACT_APP_SOCKET);
+  // console.log(process.env.REACT_APP_SOCKET);
   useEffect(() => {    
     const newSocket = io(process.env.REACT_APP_SOCKET, { query: { id } });
     setSocket(newSocket);

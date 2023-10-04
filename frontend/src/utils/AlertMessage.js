@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+/* import React, { useEffect, useState, useRef } from "react";
 import { Alert } from "react-bootstrap";
 import Swal from "sweetalert2";
 
@@ -86,3 +86,4 @@ const AlertMessage = ({
 };
 
 export default AlertMessage;
+ */

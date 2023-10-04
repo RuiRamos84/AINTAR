@@ -549,11 +549,12 @@ class Entities(Resource):
                 "descr": raw_data.get("descr", None),
             }
             ident_types_list = fetch_meta_data('ident_types')
+            print(dados);
 
-            # Gerar um valor de PK usando a função fs_nextcode()
-            pk_query = text("SELECT fs_nextcode()")
-            pk_result = db.session.execute(pk_query).scalar()
-            dados['pk'] = pk_result
+            # # Gerar um valor de PK usando a função fs_nextcode()
+            # pk_query = text("SELECT fs_nextcode()")
+            # pk_result = db.session.execute(pk_query).scalar()
+            # dados['pk'] = pk_result
 
             # Chamar a função fbf_entity para adicionar uma nova entidade
             add_query = text("""
@@ -569,8 +570,6 @@ class Entities(Resource):
             error_message = format_message(str(e))
             if 'NIF/NIPC JÁ EXISTE' in error_message:
                 return {'erro': 'O NIPC já está em utilização'}, 400
-            if 'EMAIL INVÁLIDO' in error_message:
-                return {'erro': 'O email inserido é inválido'}, 400
             else:
                 return {"erro": error_message}, 500
 
@@ -640,8 +639,7 @@ class Documents(Resource):
         """Listar todos os documentos"""
         try:            
             # Consultar todos os documentos usando a view vbf_document
-            documents_query = text(
-                "SELECT * FROM vbl_document order by pk")
+            documents_query = text("SELECT * FROM vbl_document")
             documents_result = db.session.execute(documents_query).fetchall()
 
             if documents_result:

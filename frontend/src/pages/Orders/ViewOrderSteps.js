@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useContext, useRef } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import {
   InputGroup,
   Modal,
@@ -20,7 +20,7 @@ import { AlertContext } from "../../context/AlertContext";
 import OrdersService from "../../services/OrderService";
 
 
-const OrderStepModal = ({
+const ViewOrderSteps = ({
   show,
   handleClose,
   orderStep,
@@ -34,7 +34,9 @@ const OrderStepModal = ({
   const [whoList, setWhoList] = useState([]); // para a lista formatada de 'who'
   const [whatList, setWhatList] = useState([]); // para a lista formatada de 'what'
   const authContext = useContext(AuthContext);
-  const [fileInputs, setFileInputs] = useState([{ file: null, description: "" }]);
+  const [fileInputs, setFileInputs] = useState([
+    { file: null, description: "" },
+  ]);
   const [errorMessage, setErrorMessage] = useState("");
   const [activeTooltip, setActiveTooltip] = useState({
     target: null,
@@ -42,32 +44,29 @@ const OrderStepModal = ({
   });
   const { showAlert } = useContext(AlertContext);
 
-
-const handleFileChange = (e, index) => {
-  const { files } = e.target;
-  if (files.length > 0) {
-    const newFileInputs = [...fileInputs];
-    newFileInputs[index].file = files[0];
-    newFileInputs[index].description = ""; // Limpar o campo de descrição
-    if (fileInputs.length < 5) {
-      newFileInputs.push({ file: null, description: "" });
-    } else {
-      setErrorMessage("Limite máximo de 5 arquivos iniciais por pedido.");
+  const handleFileChange = (e, index) => {
+    const { files } = e.target;
+    if (files.length > 0) {
+      const newFileInputs = [...fileInputs];
+      newFileInputs[index].file = files[0];
+      newFileInputs[index].description = ""; // Limpar o campo de descrição
+      if (fileInputs.length < 5) {
+        newFileInputs.push({ file: null, description: "" });
+      } else {
+        setErrorMessage("Limite máximo de 5 arquivos iniciais por pedido.");
+      }
+      setFileInputs(newFileInputs);
+      e.target.value = null; // Limpar o campo de arquivo
     }
-    setFileInputs(newFileInputs);
-    e.target.value = null; // Limpar o campo de arquivo
-  }
-};
-
-
-
-const handleDescriptionChange = (e, index) => {
-  const { value } = e.target;
-  const newFileInputs = [...fileInputs];
-  newFileInputs[index].description = value;
-  setFileInputs(newFileInputs);
   };
-  
+
+  const handleDescriptionChange = (e, index) => {
+    const { value } = e.target;
+    const newFileInputs = [...fileInputs];
+    newFileInputs[index].description = value;
+    setFileInputs(newFileInputs);
+  };
+
   const handleRemoveFile = (index) => {
     const newFileInputs = [...fileInputs];
     newFileInputs.splice(index, 1);
@@ -76,7 +75,6 @@ const handleDescriptionChange = (e, index) => {
     }
     setFileInputs(newFileInputs);
   };
-  
 
   // Atualize as listas formatadas sempre que o contexto for atualizado
   useEffect(() => {
@@ -101,14 +99,12 @@ const handleDescriptionChange = (e, index) => {
       OrdersService.getDocumentStep(orderStep.pk)
         .then((res) => {
           setorderSteps(res.data.document_step);
-        })        
+        })
         .catch((err) => {
           console.error(err);
         });
     }
   }, [orderStep]);
-
-
 
   const handleSave = async () => {
     if (!orderStep || orderStep.pk === null) {
@@ -168,7 +164,6 @@ const handleDescriptionChange = (e, index) => {
       setorderSteps(updatedData.data.document_step);
 
       if (what && who) {
-
         authContext.socket.emit("forward_order", {
           userId: who,
           orderId: pk_order,
@@ -192,9 +187,6 @@ const handleDescriptionChange = (e, index) => {
       console.error(err);
     }
   };
-
-
-
 
   const getLabel = (fieldName) => {
     const field = fieldMappings.find((field) => field.name === fieldName);
@@ -236,9 +228,6 @@ const handleDescriptionChange = (e, index) => {
     }
   }
 
-
-
-
   return (
     <Modal show={show} onHide={handleClose} size="lg">
       <Modal.Header closeButton>
@@ -252,126 +241,9 @@ const handleDescriptionChange = (e, index) => {
           <Modal.Title>
             Movimentos do Pedido - {regnumber && `${regnumber}`}
           </Modal.Title>
-          {/* <Button variant="primary" onClick={handleSave}>
-            Salvar
-          </Button> */}
         </div>
       </Modal.Header>
-      <Modal.Body>
-        {/* <Form>
-          <Form.Group className="mb-3">
-            <FloatingLabel controlId="floatingTextarea2" label="Observações">
-              <Form.Control
-                as="textarea"
-                rows={4}
-                value={memo}
-                onChange={(e) => setMemo(e.target.value)}
-                placeholder=" "
-              />
-            </FloatingLabel>
-          </Form.Group>
-          <Row>
-            <Col>
-              <Form.Group className="mb-3">
-                <FloatingLabel
-                  controlId="floatingSelectGrid1"
-                  label="Para Quem?"
-                >
-                  <Form.Select
-                    value={who}
-                    onChange={(e) => setWho(e.target.value)}
-                    placeholder=" "
-                  >
-                    <option value="">Selecione...</option>
-                    {whoList &&
-                      whoList.map((whoItem, index) => (
-                        <option key={index} value={whoItem.value}>
-                          {whoItem.label}
-                        </option>
-                      ))}
-                  </Form.Select>
-                </FloatingLabel>
-              </Form.Group>
-            </Col>
-            <Col>
-              <Form.Group className="mb-3">
-                <FloatingLabel controlId="floatingSelectGrid2" label="Estado">
-                  <Form.Select
-                    value={what}
-                    onChange={(e) => setWhat(e.target.value)}
-                    placeholder=" "
-                  >
-                    <option value="">Selecione...</option>
-                    {whatList &&
-                      whatList.map((whatItem, index) => (
-                        <option key={index} value={whatItem.value}>
-                          {whatItem.label}
-                        </option>
-                      ))}
-                  </Form.Select>
-                </FloatingLabel>
-              </Form.Group>
-            </Col>
-          </Row>
-          {fileInputs.map((fileInput, index) => (
-            <Row key={index}>
-              <Col>
-                <Form.Group className="mb-3">
-                  <InputGroup>
-                    <InputGroup.Text>
-                      <BsFolderPlus
-                        size={16}
-                        style={{ cursor: "pointer" }}
-                        onClick={() =>
-                          document
-                            .getElementById(`upload-button-${index}`)
-                            .click()
-                        }
-                      />
-                    </InputGroup.Text>
-                    <FormControl
-                      type="text"
-                      value={fileInput.file ? fileInput.file.name : ""}
-                      placeholder="Nenhum arquivo selecionado"
-                      readOnly
-                    />
-                    <FormControl
-                      type="file"
-                      onChange={(e) => handleFileChange(e, index)}
-                      hidden
-                      id={`upload-button-${index}`}
-                    />
-                    {fileInput.file && (
-                      <InputGroup.Text onClick={() => handleRemoveFile(index)}>
-                        <BsTrash />
-                      </InputGroup.Text>
-                    )}
-                  </InputGroup>
-                  <Form.Label>Arquivo {index + 1}</Form.Label>
-                </Form.Group>
-              </Col>
-              <Col>
-                {fileInput.file && (
-                  <Form.Group className="mb-3">
-                    <FloatingLabel
-                      controlId={`floatingDescription${index}`}
-                      label={`Descrição do Arquivo ${index + 1}`}
-                    >
-                      <Form.Control
-                        type="text"
-                        value={fileInput.description}
-                        onChange={(e) => handleDescriptionChange(e, index)}
-                        placeholder=" "
-                      />
-                    </FloatingLabel>
-                  </Form.Group>
-                )}
-              </Col>
-            </Row>
-          ))}        
-          
-          {errorMessage && <p>{errorMessage}</p>}
-        </Form> */}
+      <Modal.Body>        
         {orderSteps.length > 0 ? (
           <Table
             striped
@@ -485,4 +357,4 @@ const handleDescriptionChange = (e, index) => {
   );
 };
 
-export default OrderStepModal;
+export default ViewOrderSteps;

@@ -107,7 +107,7 @@ const AppNavbar = () => {
                 <>
                   <Nav.Link href="/dashboard">Dashboard</Nav.Link>
                   <Nav.Link href="/my_orders_tasks">
-                    Tarefas 
+                    Tarefas
                     {orderCount > 0 && (
                       <span className="badge rounded-pill bg-danger ms-1">
                         {orderCount < 100 ? orderCount : "99+"}
@@ -169,7 +169,7 @@ const AppNavbar = () => {
                         className="rounded-circle"
                         alt="Avatar"
                       />
-
+                      &nbsp;
                       {user.user_name}
                     </Dropdown.Toggle>
                     <Dropdown.Menu className="dropdown-menu-end" variant="dark">
